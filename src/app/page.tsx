@@ -3,7 +3,7 @@
 import { Navigation } from "@/components/Navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { ShieldAlert, MapPin, Siren, Hospital, Hotel, MessageSquare, ArrowRight, Star, Shield } from "lucide-react"
+import { ShieldAlert, MapPin, Siren, Hospital, Hotel, MessageSquare, ArrowRight, Star, Shield, Users } from "lucide-react"
 import Link from "next/link"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
@@ -101,14 +101,14 @@ export default function Home() {
           </Card>
 
           <Card className="hover:shadow-md transition-shadow cursor-pointer overflow-hidden border-none bg-white">
-            <Link href="/feedback">
+            <Link href="/community">
               <CardContent className="p-6 flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-600">
-                  <Star className="w-6 h-6" />
+                <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center text-purple-600">
+                  <Users className="w-6 h-6" />
                 </div>
                 <div className="flex-1">
                   <h3 className="font-bold">Community Safety</h3>
-                  <p className="text-sm text-muted-foreground">Report issues in your neighborhood.</p>
+                  <p className="text-sm text-muted-foreground">Share travel experiences with others.</p>
                 </div>
                 <ArrowRight className="w-5 h-5 text-muted-foreground" />
               </CardContent>

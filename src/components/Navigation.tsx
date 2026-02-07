@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Home, Shield, MapPin, MessageCircle, Star, Info } from "lucide-react"
+import { Home, Shield, MapPin, MessageCircle, Star, Users } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 export function Navigation() {
@@ -13,7 +13,7 @@ export function Navigation() {
     { name: "Chat", href: "/chat", icon: MessageCircle },
     { name: "Resources", href: "/nearby", icon: Shield },
     { name: "Hotels", href: "/hotels", icon: Star },
-    { name: "Feedback", href: "/feedback", icon: Info },
+    { name: "Community", href: "/community", icon: Users },
   ]
 
   return (
