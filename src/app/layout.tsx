@@ -1,11 +1,10 @@
-
 import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 
 export const metadata: Metadata = {
-  title: 'Guardian Angel - Your Personal Safety Companion',
-  description: 'Immediate SOS, chatbot assistance, and nearby safety resources.',
+  title: 'Guardian Angel TN - Personal Safety for Tamil Nadu',
+  description: 'Immediate SOS, chatbot assistance, and nearby safety resources specifically for citizens and travelers in Tamil Nadu.',
 };
 
 export default function RootLayout({

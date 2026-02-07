@@ -1,4 +1,3 @@
-
 "use client"
 
 import { Navigation } from "@/components/Navigation"
@@ -11,15 +10,15 @@ import { useState } from "react"
 
 export default function NearbyResourcesPage() {
   const hospitals = [
-    { name: "Central Memorial Hospital", address: "123 Medical Way", distance: "0.8 miles", phone: "555-0101" },
-    { name: "City Care Clinic", address: "45 Health Blvd", distance: "1.2 miles", phone: "555-0102" },
-    { name: "Emergency Trauma Center", address: "88 Rescue Lane", distance: "2.5 miles", phone: "555-0103" },
+    { name: "Apollo Hospitals, Greams Road", address: "Greams Lane, Off Greams Road, Chennai", distance: "1.2 km", phone: "044 2829 3333" },
+    { name: "MIOT International", address: "Mount Poonamallee Road, Manapakkam, Chennai", distance: "5.4 km", phone: "044 4222 6000" },
+    { name: "Madurai Medical College", address: "Panagal Rd, Alwarpuram, Madurai", distance: "2.1 km", phone: "0452 253 2531" },
   ]
 
   const police = [
-    { name: "Precinct 14 Station", address: "50 Security Ave", distance: "0.4 miles", phone: "555-9001" },
-    { name: "Metro Police HQ", address: "10 Public Safety Plaza", distance: "1.5 miles", phone: "555-9002" },
-    { name: "North Division Branch", address: "201 Patrol Road", distance: "3.2 miles", phone: "555-9003" },
+    { name: "Greater Chennai Police Commissionerate", address: "Vepery High Road, Chennai", distance: "0.8 km", phone: "100" },
+    { name: "K5 Peravallur Police Station", address: "Jawahar Nagar, Chennai", distance: "2.5 km", phone: "044 2345 2641" },
+    { name: "B1 Madurai Town Police Station", address: "Simmakkal, Madurai", distance: "1.5 km", phone: "0452 234 6500" },
   ]
 
   return (
@@ -30,13 +29,13 @@ export default function NearbyResourcesPage() {
           <Link href="/" className="inline-flex items-center text-muted-foreground hover:text-foreground">
             <ChevronLeft className="w-5 h-5 mr-1" /> Dashboard
           </Link>
-          <h1 className="text-3xl font-bold font-headline">Nearby Resources</h1>
-          <p className="text-muted-foreground">Quick access to emergency help centers around you.</p>
+          <h1 className="text-3xl font-bold font-headline">Tamil Nadu Resources</h1>
+          <p className="text-muted-foreground">Quick access to TN Police and major medical centers near you.</p>
         </header>
 
         <div className="h-48 bg-slate-200 rounded-2xl relative overflow-hidden shadow-inner">
           <img 
-            src="https://picsum.photos/seed/nearby-map/1200/400" 
+            src="https://picsum.photos/seed/tn-map/1200/400" 
             alt="Resource Map" 
             className="w-full h-full object-cover opacity-70 grayscale"
           />
@@ -49,7 +48,7 @@ export default function NearbyResourcesPage() {
         <Tabs defaultValue="police" className="w-full">
           <TabsList className="grid w-full grid-cols-2 bg-white h-12 p-1 border border-border rounded-full shadow-sm">
             <TabsTrigger value="police" className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-white">
-              <Shield className="w-4 h-4 mr-2" /> Police
+              <Shield className="w-4 h-4 mr-2" /> TN Police
             </TabsTrigger>
             <TabsTrigger value="hospitals" className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-white">
               <Hospital className="w-4 h-4 mr-2" /> Hospitals
@@ -72,8 +71,10 @@ export default function NearbyResourcesPage() {
                       <MapPin className="w-3 h-3" /> {p.address}
                     </p>
                     <div className="flex gap-2 mt-4">
-                      <Button variant="outline" size="sm" className="flex-1 gap-2 rounded-full">
-                        <Phone className="w-3 h-3" /> Call
+                      <Button variant="outline" size="sm" className="flex-1 gap-2 rounded-full" asChild>
+                        <a href={`tel:${p.phone}`}>
+                          <Phone className="w-3 h-3" /> Call {p.phone}
+                        </a>
                       </Button>
                       <Button size="sm" className="flex-1 gap-2 rounded-full">
                         <ExternalLink className="w-3 h-3" /> Navigate
@@ -101,8 +102,10 @@ export default function NearbyResourcesPage() {
                       <MapPin className="w-3 h-3" /> {h.address}
                     </p>
                     <div className="flex gap-2 mt-4">
-                      <Button variant="outline" size="sm" className="flex-1 gap-2 rounded-full">
-                        <Phone className="w-3 h-3" /> Call
+                      <Button variant="outline" size="sm" className="flex-1 gap-2 rounded-full" asChild>
+                        <a href={`tel:${h.phone}`}>
+                          <Phone className="w-3 h-3" /> Call
+                        </a>
                       </Button>
                       <Button size="sm" className="flex-1 gap-2 rounded-full bg-blue-600 hover:bg-blue-700">
                         <ExternalLink className="w-3 h-3" /> Navigate

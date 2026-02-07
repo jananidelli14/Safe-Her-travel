@@ -1,4 +1,3 @@
-
 "use client"
 
 import { Navigation } from "@/components/Navigation"
@@ -46,9 +45,9 @@ export default function SOSPage() {
             <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center text-green-600 animate-bounce">
               <CheckCircle2 className="w-12 h-12" />
             </div>
-            <h1 className="text-4xl font-black text-foreground font-headline">Help is on the Way</h1>
+            <h1 className="text-4xl font-black text-foreground font-headline">Tamil Nadu Help is Active</h1>
             <p className="text-xl text-muted-foreground max-w-md">
-              Your SOS signal has been sent. Your live location is being shared with emergency services and your primary contacts.
+              Your SOS signal has been sent to TN Police Dispatch and your emergency contacts.
             </p>
           </div>
 
@@ -56,13 +55,13 @@ export default function SOSPage() {
             <CardHeader className="bg-primary text-white p-4">
               <CardTitle className="text-lg flex items-center gap-2">
                 <Loader2 className="w-5 h-5 animate-spin" />
-                Live Tracking Active
+                Live TN Location Tracking
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
               <div className="h-64 bg-slate-200 relative flex items-center justify-center overflow-hidden">
                 <img 
-                  src="https://picsum.photos/seed/mapview/800/600" 
+                  src="https://picsum.photos/seed/chennai-map/800/600" 
                   alt="Map Placeholder" 
                   className="w-full h-full object-cover opacity-60 grayscale"
                 />
@@ -72,18 +71,22 @@ export default function SOSPage() {
                 </div>
                 <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm p-3 rounded-lg shadow-sm border border-border">
                   <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Current Status</p>
-                  <p className="text-sm font-medium">Police Dispatch En-route (ETA 4m)</p>
+                  <p className="text-sm font-medium">TN Police En-route (ETA 6m)</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <div className="grid grid-cols-2 gap-4">
-            <Button variant="outline" className="h-16 flex items-center gap-2 text-lg">
-              <Phone className="w-5 h-5" /> Call Police
+            <Button variant="outline" className="h-16 flex items-center gap-2 text-lg" asChild>
+              <a href="tel:100">
+                <Phone className="w-5 h-5" /> Call Police (100)
+              </a>
             </Button>
-            <Button variant="outline" className="h-16 flex items-center gap-2 text-lg">
-              <Phone className="w-5 h-5" /> Call Medical
+            <Button variant="outline" className="h-16 flex items-center gap-2 text-lg" asChild>
+              <a href="tel:108">
+                <Phone className="w-5 h-5" /> Call Ambulance (108)
+              </a>
             </Button>
           </div>
 
@@ -104,13 +107,13 @@ export default function SOSPage() {
       <Navigation />
       <main className="max-w-4xl mx-auto p-6 space-y-8">
         <Link href="/" className="inline-flex items-center text-muted-foreground hover:text-foreground transition-colors">
-          <ChevronLeft className="w-5 h-5 mr-1" /> Back to Safety Dashboard
+          <ChevronLeft className="w-5 h-5 mr-1" /> Back to TN Safety Dashboard
         </Link>
 
         <div className="text-center space-y-4 pt-8">
-          <h1 className="text-3xl font-black font-headline text-foreground">Emergency SOS</h1>
+          <h1 className="text-3xl font-black font-headline text-foreground">Tamil Nadu Emergency SOS</h1>
           <p className="text-muted-foreground max-w-sm mx-auto">
-            Activating SOS will immediately notify your emergency contacts and local authorities with your real-time location.
+            Activating SOS will immediately notify local TN authorities and your family with your real-time location.
           </p>
         </div>
 
@@ -167,16 +170,16 @@ export default function SOSPage() {
           <h3 className="font-bold text-center">Your SOS will notify:</h3>
           <div className="flex justify-center gap-4">
             <div className="flex flex-col items-center gap-1">
-              <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm border border-border">911</div>
-              <span className="text-xs text-muted-foreground">Authorities</span>
+              <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm border border-border">100</div>
+              <span className="text-xs text-muted-foreground">TN Police</span>
             </div>
             <div className="flex flex-col items-center gap-1">
-              <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm border border-border text-sm font-bold">JD</div>
-              <span className="text-xs text-muted-foreground">Jane Doe</span>
+              <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm border border-border text-sm font-bold text-primary">112</div>
+              <span className="text-xs text-muted-foreground">National ER</span>
             </div>
             <div className="flex flex-col items-center gap-1">
-              <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm border border-border text-sm font-bold">BS</div>
-              <span className="text-xs text-muted-foreground">Bob Smith</span>
+              <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm border border-border text-sm font-bold">EC</div>
+              <span className="text-xs text-muted-foreground">Emergency Contacts</span>
             </div>
           </div>
         </section>

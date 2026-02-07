@@ -1,4 +1,3 @@
-
 "use client"
 
 import { Navigation } from "@/components/Navigation"
@@ -28,8 +27,11 @@ export default function Home() {
       <main className="max-w-4xl mx-auto p-6 space-y-8">
         <header className="flex justify-between items-start">
           <div>
-            <h1 className="text-3xl font-bold font-headline text-foreground">Guardian Angel</h1>
-            <p className="text-muted-foreground">Your personal safety companion.</p>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="bg-primary/20 text-primary text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-tighter">Tamil Nadu Regional Edition</span>
+            </div>
+            <h1 className="text-3xl font-bold font-headline text-foreground">Guardian Angel TN</h1>
+            <p className="text-muted-foreground">Your safety companion in the heart of Tamil Nadu.</p>
           </div>
           <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full border border-border shadow-sm">
             <MapPin className="w-4 h-4 text-primary" />
@@ -47,7 +49,7 @@ export default function Home() {
             </button>
           </Link>
           <p className="text-sm font-medium text-center max-w-xs text-muted-foreground">
-            Press and hold to trigger an emergency signal to your designated contacts.
+            Press and hold to trigger an emergency signal to TN Police and your contacts.
           </p>
         </div>
 
@@ -75,8 +77,8 @@ export default function Home() {
                   <ShieldAlert className="w-6 h-6" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-bold">Nearby Resources</h3>
-                  <p className="text-sm text-muted-foreground">Find police and hospitals nearby.</p>
+                  <h3 className="font-bold">Local TN Resources</h3>
+                  <p className="text-sm text-muted-foreground">Find nearby TN Police and Hospitals.</p>
                 </div>
                 <ArrowRight className="w-5 h-5 text-muted-foreground" />
               </CardContent>
@@ -90,8 +92,8 @@ export default function Home() {
                   <Hotel className="w-6 h-6" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-bold">Safe Hotels</h3>
-                  <p className="text-sm text-muted-foreground">AI-vetted safe accommodation suggestions.</p>
+                  <h3 className="font-bold">Verified Accommodations</h3>
+                  <p className="text-sm text-muted-foreground">AI-vetted safe stays in Tamil Nadu.</p>
                 </div>
                 <ArrowRight className="w-5 h-5 text-muted-foreground" />
               </CardContent>
@@ -105,8 +107,8 @@ export default function Home() {
                   <Star className="w-6 h-6" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-bold">Feedback</h3>
-                  <p className="text-sm text-muted-foreground">Help us improve your safety tools.</p>
+                  <h3 className="font-bold">Community Safety</h3>
+                  <p className="text-sm text-muted-foreground">Report issues in your neighborhood.</p>
                 </div>
                 <ArrowRight className="w-5 h-5 text-muted-foreground" />
               </CardContent>
@@ -119,9 +121,9 @@ export default function Home() {
             <Shield className="w-5 h-5" />
           </div>
           <div>
-            <h4 className="font-bold text-primary">Safety Tip</h4>
+            <h4 className="font-bold text-primary">Safety Tip for TN</h4>
             <p className="text-sm text-foreground/80 leading-relaxed">
-              Always keep your live location sharing on when walking alone at night. Guardian Angel keeps your contacts informed until you reach your destination safely.
+              In case of emergency, the Tamil Nadu State Emergency number is 100 or 112. Use the 'Kavalan-SOS' feature if you're traveling solo in Chennai or other urban hubs.
             </p>
           </div>
         </section>
