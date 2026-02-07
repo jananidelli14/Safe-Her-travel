@@ -7,12 +7,14 @@ import { MapPin, Siren, Loader2, Phone, CheckCircle2, ChevronLeft } from "lucide
 import Link from "next/link"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import { useToast } from "@/hooks/use-toast"
 
 export default function SOSPage() {
   const [isTriggered, setIsTriggered] = useState(false)
   const [countdown, setCountdown] = useState(5)
   const [isActivating, setIsActivating] = useState(false)
   const router = useRouter()
+  const { toast } = useToast()
 
   useEffect(() => {
     let timer: NodeJS.Timeout
@@ -23,9 +25,13 @@ export default function SOSPage() {
     } else if (isActivating && countdown === 0) {
       setIsTriggered(true)
       setIsActivating(false)
+      toast({
+        title: "SOS Signal Sent",
+        description: "The help is on the Way. Approximate arrival time: 6 minutes.",
+      })
     }
     return () => clearInterval(timer)
-  }, [isActivating, countdown])
+  }, [isActivating, countdown, toast])
 
   const handleTrigger = () => {
     setIsActivating(true)
