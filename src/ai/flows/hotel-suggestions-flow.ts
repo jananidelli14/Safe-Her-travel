@@ -1,7 +1,7 @@
 'use server';
 
 /**
- * @fileOverview This file defines a Genkit flow for suggesting nearby hotels based on location and safety, using Google review data.
+ * @fileOverview This file defines a Genkit flow for suggesting nearby hotels in Tamil Nadu based on location and safety, using Google review data.
  *
  * - suggestSafeHotels - A function that takes location information and returns a list of suggested hotels.
  * - HotelSuggestionsInput - The input type for the suggestSafeHotels function.
@@ -39,36 +39,18 @@ const hotelSuggestionsPrompt = ai.definePrompt({
   name: 'hotelSuggestionsPrompt',
   input: {schema: HotelSuggestionsInputSchema},
   output: {schema: HotelSuggestionsOutputSchema},
-  prompt: `You are a safety-conscious travel assistant. A user is in distress and needs a safe hotel recommendation.
-Based on the user's current location (latitude: {{{latitude}}}, longitude: {{{longitude}}}) and any specific safety concerns they have ({{{safetyConcerns}}}), suggest a few hotels.
+  prompt: `You are a safety-conscious travel assistant specializing in Tamil Nadu, India. A user is in distress and needs a safe hotel recommendation in the region.
+Based on the user's current location (latitude: {{{latitude}}}, longitude: {{{longitude}}}) and any specific safety concerns they have ({{{safetyConcerns}}}), suggest a few reputable hotels in Tamil Nadu.
 
 Consider these factors when selecting hotels:
+*   Proximity to the user's location within Tamil Nadu.
+*   Positive Google reviews, particularly regarding safety, security, and cleanliness in the TN context.
+*   Hotel safety scores from reputable sources. You should only suggest hotels that score 7 or higher.
+*   Price range appropriate for someone in an emergency situation.
 
-*   Proximity to the user's location.
-*   Positive Google reviews, particularly regarding safety, security, and cleanliness.
-*   Hotel safety scores from reputable sources (if available). You should only suggest hotels that score 7 or higher.
-*   Price range appropriate for someone in an emergency situation (avoid overly expensive options).
-
-Present your suggestions in the following format:
-
-Suggestions:
-```json
-{
-  "suggestions": [
-    {
-      "name": "Hotel Name",
-      "address": "Hotel Address",
-      "googleReviewsSummary": "Summary of Google reviews focusing on safety and cleanliness.",
-      "safetyScore": 8,
-      "priceRange": "$$",
-    },
-    // More hotel suggestions
-  ]
-}
-```
 Make sure the Google review summary focuses on the most recent reviews and extracts any mentions of the hotel's safety and security.
-Remember to only suggest hotels, never suggest other types of establishments such as hostels or motels.
-`,config: {
+Remember to only suggest registered hotels, never suggest other types of establishments such as hostels or motels.`,
+  config: {
     safetySettings: [
       {
         category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
