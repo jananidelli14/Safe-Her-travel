@@ -1,26 +1,32 @@
+
 "use client"
 
 import { Navigation } from "@/components/Navigation"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Hotel, MapPin, ShieldCheck, Loader2, Star, ChevronLeft, Search } from "lucide-react"
+import { Hotel, MapPin, ShieldCheck, Loader2, ChevronLeft, Search } from "lucide-react"
 import Link from "next/link"
 import { useState } from "react"
 import { suggestSafeHotels, type HotelSuggestionsOutput } from "@/ai/flows/hotel-suggestions-flow"
+import { useToast } from "@/hooks/use-toast"
 
 export default function HotelsPage() {
   const [loading, setLoading] = useState(false)
   const [safetyConcerns, setSafetyConcerns] = useState("")
   const [results, setResults] = useState<HotelSuggestionsOutput | null>(null)
+  const { toast } = useToast()
 
   const handleSearch = async () => {
     setLoading(true)
     try {
-      // Get current location
       const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(resolve, reject)
+        if (!navigator.geolocation) {
+          reject(new Error("Geolocation is not supported by your browser"))
+        } else {
+          navigator.geolocation.getCurrentPosition(resolve, reject)
+        }
       })
       
       const response = await suggestSafeHotels({
@@ -30,8 +36,12 @@ export default function HotelsPage() {
       })
       
       setResults(response)
-    } catch (error) {
-      console.error("Failed to fetch suggestions", error)
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Location Error",
+        description: error.message || "Please enable location services to find nearby hotels.",
+      })
     } finally {
       setLoading(false)
     }

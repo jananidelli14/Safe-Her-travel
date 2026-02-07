@@ -1,3 +1,4 @@
+
 "use client"
 
 import { Navigation } from "@/components/Navigation"
@@ -6,8 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { MapPin, MessageSquare, ThumbsUp, Send, ShieldCheck, AlertTriangle, User, ChevronLeft, Users } from "lucide-react"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { MapPin, MessageSquare, ThumbsUp, ShieldCheck, AlertTriangle, User, ChevronLeft, Users } from "lucide-react"
 import Link from "next/link"
 import { useState } from "react"
 import { useToast } from "@/hooks/use-toast"

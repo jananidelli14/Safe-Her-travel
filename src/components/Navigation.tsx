@@ -1,8 +1,9 @@
+
 "use client"
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Home, Shield, MapPin, MessageCircle, Star, Users } from "lucide-react"
+import { Home, Shield, MessageCircle, Star, Users } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 export function Navigation() {

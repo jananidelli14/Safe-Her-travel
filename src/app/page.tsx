@@ -1,21 +1,21 @@
+
 "use client"
 
 import { Navigation } from "@/components/Navigation"
-import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { ShieldAlert, MapPin, Siren, Hospital, Hotel, MessageSquare, ArrowRight, Star, Shield, Users } from "lucide-react"
+import { ShieldAlert, MapPin, Siren, Hotel, MessageSquare, ArrowRight, Shield, Users } from "lucide-react"
 import Link from "next/link"
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
 
 export default function Home() {
   const [location, setLocation] = useState<string | null>(null)
-  const router = useRouter()
 
   useEffect(() => {
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition((position) => {
         setLocation(`${position.coords.latitude.toFixed(4)}, ${position.coords.longitude.toFixed(4)}`)
+      }, () => {
+        setLocation("Location access denied")
       })
     }
   }, [])
@@ -49,7 +49,7 @@ export default function Home() {
             </button>
           </Link>
           <p className="text-sm font-medium text-center max-w-xs text-muted-foreground">
-            Press and hold to trigger an emergency signal to TN Police and your contacts.
+            Trigger an emergency signal to TN Police and your contacts.
           </p>
         </div>
 
