@@ -28,10 +28,10 @@ export default function Home() {
         <header className="flex justify-between items-start">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className="bg-primary/20 text-primary text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-tighter">Tamil Nadu Regional Edition</span>
+              <span className="bg-primary/20 text-primary text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-tighter">Tamil Nadu Women's Edition</span>
             </div>
-            <h1 className="text-3xl font-bold font-headline text-foreground">Guardian Angel TN</h1>
-            <p className="text-muted-foreground">Your safety companion in the heart of Tamil Nadu.</p>
+            <h1 className="text-3xl font-bold font-headline text-foreground">Safe Her Travel</h1>
+            <p className="text-muted-foreground">Your trusted safety companion across Tamil Nadu.</p>
           </div>
           <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full border border-border shadow-sm">
             <MapPin className="w-4 h-4 text-primary" />

@@ -51,7 +51,7 @@ export default function SOSPage() {
             </p>
           </div>
 
-          <Card className="border-none bg-blue-50 shadow-sm overflow-hidden">
+          < Card className="border-none bg-blue-50 shadow-sm overflow-hidden">
             <CardHeader className="bg-primary text-white p-4">
               <CardTitle className="text-lg flex items-center gap-2">
                 <Loader2 className="w-5 h-5 animate-spin" />
@@ -107,11 +107,11 @@ export default function SOSPage() {
       <Navigation />
       <main className="max-w-4xl mx-auto p-6 space-y-8">
         <Link href="/" className="inline-flex items-center text-muted-foreground hover:text-foreground transition-colors">
-          <ChevronLeft className="w-5 h-5 mr-1" /> Back to TN Safety Dashboard
+          <ChevronLeft className="w-5 h-5 mr-1" /> Back to Dashboard
         </Link>
 
         <div className="text-center space-y-4 pt-8">
-          <h1 className="text-3xl font-black font-headline text-foreground">Tamil Nadu Emergency SOS</h1>
+          <h1 className="text-3xl font-black font-headline text-foreground">Safe Her Travel SOS</h1>
           <p className="text-muted-foreground max-w-sm mx-auto">
             Activating SOS will immediately notify local TN authorities and your family with your real-time location.
           </p>

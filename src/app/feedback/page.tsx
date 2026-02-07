@@ -1,4 +1,3 @@
-
 "use client"
 
 import { Navigation } from "@/components/Navigation"
@@ -36,7 +35,7 @@ export default function FeedbackPage() {
           <div className="space-y-2">
             <h1 className="text-3xl font-black">Feedback Received</h1>
             <p className="text-muted-foreground">
-              Your insights are vital to our mission of providing safety for everyone, everywhere.
+              Your insights are vital to our mission of providing safety for everyone traveling.
             </p>
           </div>
           <Button asChild className="w-full h-12 rounded-full">
@@ -56,7 +55,7 @@ export default function FeedbackPage() {
             <ChevronLeft className="w-5 h-5 mr-1" /> Dashboard
           </Link>
           <h1 className="text-3xl font-bold font-headline">App Feedback</h1>
-          <p className="text-muted-foreground">How was your experience with Guardian Angel?</p>
+          <p className="text-muted-foreground">How was your experience with Safe Her Travel?</p>
         </header>
 
         <form onSubmit={handleSubmit} className="space-y-6">

@@ -11,7 +11,7 @@ import { useState, useRef, useEffect } from "react"
 
 export default function ChatPage() {
   const [messages, setMessages] = useState([
-    { id: 1, role: 'assistant', text: "Hello, I'm your Guardian Assistant for Tamil Nadu. I'm here to help you stay safe in the region. How can I assist you right now?" },
+    { id: 1, role: 'assistant', text: "Hello, I'm your Safe Her Travel Assistant for Tamil Nadu. I'm here to help you stay safe. How can I assist you right now?" },
   ])
   const [input, setInput] = useState("")
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -55,7 +55,7 @@ export default function ChatPage() {
           </AvatarFallback>
         </Avatar>
         <div>
-          <h1 className="font-bold">Guardian TN Assistant</h1>
+          <h1 className="font-bold">Safe Her Travel Assistant</h1>
           <div className="flex items-center gap-1.5">
             <div className="w-2 h-2 bg-green-500 rounded-full"></div>
             <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Active in Tamil Nadu</span>

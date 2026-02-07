@@ -3,8 +3,8 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 
 export const metadata: Metadata = {
-  title: 'Guardian Angel TN - Personal Safety for Tamil Nadu',
-  description: 'Immediate SOS, chatbot assistance, and nearby safety resources specifically for citizens and travelers in Tamil Nadu.',
+  title: 'Safe Her Travel - Women\'s Safety in Tamil Nadu',
+  description: 'Immediate SOS, chatbot assistance, and nearby safety resources specifically for women traveling in Tamil Nadu.',
 };
 
 export default function RootLayout({
