@@ -1,0 +1,161 @@
+"""
+SOS Emergency Routes
+Handles SOS activation, emergency contacts, and alert broadcasting
+"""
+
+from flask import Blueprint, request, jsonify
+from datetime import datetime
+from services.notification_service import send_sms, send_email
+from services.police_service import alert_nearest_police
+from database.db import get_db_connection
+import uuid
+
+sos_bp = Blueprint('sos', __name__)
+
+# Active SOS sessions storage (in production, use Redis)
+active_sos_sessions = {}
+
+@sos_bp.route('/activate', methods=['POST'])
+def activate_sos():
+    """
+    Activate SOS emergency alert
+    Request body: {
+        "user_id": "string",
+        "location": {"lat": float, "lng": float},
+        "emergency_contacts": ["phone1", "phone2"]
+    }
+    """
+    try:
+        data = request.json
+        user_id = data.get('user_id')
+        location = data.get('location')
+        emergency_contacts = data.get('emergency_contacts', [])
+        
+        # Generate unique SOS session ID
+        sos_id = str(uuid.uuid4())
+        
+        # Store SOS session
+        active_sos_sessions[sos_id] = {
+            'user_id': user_id,
+            'location': location,
+            'status': 'active',
+            'activated_at': datetime.now().isoformat(),
+            'emergency_contacts': emergency_contacts
+        }
+        
+        # Alert nearest police station
+        police_response = alert_nearest_police(location)
+        
+        # Send SMS to emergency contacts
+        for contact in emergency_contacts:
+            message = f"EMERGENCY ALERT: Your contact has activated SOS. Location: https://maps.google.com/?q={location['lat']},{location['lng']}"
+            send_sms(contact, message)
+        
+        # Send email notifications
+        if 'email' in data:
+            send_email(
+                data['email'],
+                "SOS Alert Activated",
+                f"Your SOS alert has been activated. Help is on the way. Location: {location}"
+            )
+        
+        # Save to database
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO sos_alerts (id, user_id, latitude, longitude, status, created_at)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (sos_id, user_id, location['lat'], location['lng'], 'active', datetime.now()))
+        conn.commit()
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'sos_id': sos_id,
+            'message': 'SOS activated successfully',
+            'police_station': police_response,
+            'eta_minutes': 6,
+            'status': 'active'
+        }), 200
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@sos_bp.route('/status/<sos_id>', methods=['GET'])
+def get_sos_status(sos_id):
+    """Get current status of SOS alert"""
+    if sos_id in active_sos_sessions:
+        return jsonify({
+            'success': True,
+            'sos': active_sos_sessions[sos_id]
+        }), 200
+    else:
+        return jsonify({
+            'success': False,
+            'error': 'SOS session not found'
+        }), 404
+
+@sos_bp.route('/deactivate/<sos_id>', methods=['POST'])
+def deactivate_sos(sos_id):
+    """Deactivate SOS alert"""
+    try:
+        if sos_id in active_sos_sessions:
+            active_sos_sessions[sos_id]['status'] = 'resolved'
+            active_sos_sessions[sos_id]['resolved_at'] = datetime.now().isoformat()
+            
+            # Update database
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            cursor.execute("""
+                UPDATE sos_alerts 
+                SET status = 'resolved', resolved_at = ?
+                WHERE id = ?
+            """, (datetime.now(), sos_id))
+            conn.commit()
+            conn.close()
+            
+            return jsonify({
+                'success': True,
+                'message': 'SOS deactivated successfully'
+            }), 200
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'SOS session not found'
+            }), 404
+            
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@sos_bp.route('/history/<user_id>', methods=['GET'])
+def get_sos_history(user_id):
+    """Get SOS alert history for a user"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT * FROM sos_alerts 
+            WHERE user_id = ?
+            ORDER BY created_at DESC
+            LIMIT 50
+        """, (user_id,))
+        
+        alerts = cursor.fetchall()
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'alerts': [dict(alert) for alert in alerts]
+        }), 200
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
