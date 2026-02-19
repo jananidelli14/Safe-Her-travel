@@ -1,11 +1,11 @@
 """
 Chat Routes
-AI-powered chatbot for safety assistance
+AI-powered chatbot for safety assistance - FIXED IMPORTS
 """
 
 from flask import Blueprint, request, jsonify
 from datetime import datetime
-from services.ai_service import get_ai_response
+from services.enhanced_ai_service import get_ai_response
 from database.db import get_db_connection
 import uuid
 
@@ -18,7 +18,8 @@ def send_message():
     Request body: {
         "user_id": "string",
         "message": "string",
-        "conversation_id": "string" (optional)
+        "conversation_id": "string" (optional),
+        "user_location": {"lat": float, "lng": float} (optional)
     }
     """
     try:
@@ -26,6 +27,7 @@ def send_message():
         user_id = data.get('user_id')
         message = data.get('message')
         conversation_id = data.get('conversation_id', str(uuid.uuid4()))
+        user_location = data.get('user_location')  # NEW: Get user location
         
         # Save user message
         conn = get_db_connection()
@@ -36,8 +38,8 @@ def send_message():
         """, (str(uuid.uuid4()), conversation_id, user_id, message, 'user', datetime.now()))
         conn.commit()
         
-        # Get AI response
-        ai_response = get_ai_response(message, conversation_id)
+        # Get AI response with location context
+        ai_response = get_ai_response(message, conversation_id, user_location)
         
         # Save AI response
         cursor.execute("""

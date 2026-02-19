@@ -1,83 +1,214 @@
 """
 Safe Her Travel - Backend API
-Flask-based REST API for women's safety app
+Flask application with all routes and services
 """
 
-from flask import Flask, request, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
-from flask_socketio import SocketIO, emit
-from datetime import datetime
 import os
 from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
 
+# Initialize Flask app
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your-secret-key-here')
-CORS(app)
-socketio = SocketIO(app, cors_allowed_origins="*")
+CORS(app)  # Enable CORS for frontend
 
-# Import routes
+# Configuration
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'safeher-secret-key-change-in-production')
+app.config['DATABASE'] = 'safeher_travel.db'
+
+# Import routes - FIXED IMPORTS
+from routes.user_routes import user_bp
 from routes.sos_routes import sos_bp
-from routes.chat_routes import chat_bp
 from routes.location_routes import location_bp
 from routes.resources_routes import resources_bp
-from routes.user_routes import user_bp
+from routes.chat_routes import chat_bp
+from routes.accommodations_routes import accommodations_bp
 
 # Register blueprints
+app.register_blueprint(user_bp, url_prefix='/api/user')
 app.register_blueprint(sos_bp, url_prefix='/api/sos')
-app.register_blueprint(chat_bp, url_prefix='/api/chat')
 app.register_blueprint(location_bp, url_prefix='/api/location')
 app.register_blueprint(resources_bp, url_prefix='/api/resources')
-app.register_blueprint(user_bp, url_prefix='/api/user')
-
-# WebSocket handlers for real-time tracking
-@socketio.on('connect')
-def handle_connect():
-    print('Client connected')
-    emit('connection_response', {'status': 'connected'})
-
-@socketio.on('disconnect')
-def handle_disconnect():
-    print('Client disconnected')
-
-@socketio.on('location_update')
-def handle_location_update(data):
-    """Handle real-time location updates"""
-    print(f"Location update: {data}")
-    # Broadcast to emergency contacts and authorities
-    emit('location_broadcast', data, broadcast=True)
-
-@socketio.on('sos_activated')
-def handle_sos_activation(data):
-    """Handle SOS activation in real-time"""
-    print(f"SOS activated: {data}")
-    emit('sos_alert', data, broadcast=True)
+app.register_blueprint(chat_bp, url_prefix='/api/chat')
+app.register_blueprint(accommodations_bp, url_prefix='/api/accommodations')
 
 # Health check endpoint
-@app.route('/health', methods=['GET'])
-def health_check():
+@app.route('/')
+def index():
+    """Health check endpoint"""
     return jsonify({
+        'message': 'Safe Her Travel API is running',
+        'version': '2.0',
         'status': 'healthy',
-        'timestamp': datetime.now().isoformat(),
-        'service': 'Safe Her Travel API'
-    }), 200
-
-# Root endpoint
-@app.route('/', methods=['GET'])
-def root():
-    return jsonify({
-        'message': 'Safe Her Travel API',
-        'version': '1.0.0',
-        'endpoints': {
-            'sos': '/api/sos',
-            'chat': '/api/chat',
-            'location': '/api/location',
-            'resources': '/api/resources',
-            'user': '/api/user'
+        'features': {
+            'sos_alerts': True,
+            'location_tracking': True,
+            'ai_chatbot': True,
+            'emergency_resources': True,
+            'accommodation_search': True,
+            'real_time_data': True
         }
     }), 200
 
+@app.route('/api/health')
+def health_check():
+    """Detailed health check"""
+    import sqlite3
+    
+    # Check database
+    db_healthy = False
+    police_count = 0
+    hospital_count = 0
+    try:
+        conn = sqlite3.connect(app.config['DATABASE'])
+        cursor = conn.cursor()
+        cursor.execute("SELECT COUNT(*) FROM police_stations")
+        police_count = cursor.fetchone()[0]
+        cursor.execute("SELECT COUNT(*) FROM hospitals")
+        hospital_count = cursor.fetchone()[0]
+        conn.close()
+        db_healthy = True
+    except Exception as e:
+        print(f"Database health check failed: {e}")
+    
+    # Check AI service
+    ai_healthy = bool(os.getenv('GEMINI_API_KEY'))
+    
+    # Check Google Places
+    places_healthy = bool(os.getenv('GOOGLE_PLACES_API_KEY'))
+    
+    return jsonify({
+        'status': 'healthy' if db_healthy else 'degraded',
+        'database': {
+            'status': 'connected' if db_healthy else 'error',
+            'police_stations': police_count,
+            'hospitals': hospital_count
+        },
+        'services': {
+            'ai_chatbot': 'configured' if ai_healthy else 'fallback_mode',
+            'google_places': 'configured' if places_healthy else 'fallback_mode',
+            'twilio_sms': 'configured' if os.getenv('TWILIO_ACCOUNT_SID') else 'disabled',
+            'sendgrid_email': 'configured' if os.getenv('SENDGRID_API_KEY') else 'disabled'
+        }
+    }), 200
+
+@app.route('/api/config')
+def get_config():
+    """Get public configuration for frontend"""
+    return jsonify({
+        'emergency_numbers': {
+            'police': '100',
+            'ambulance': '108',
+            'national_emergency': '112',
+            'women_helpline': '1091',
+            'child_helpline': '1098'
+        },
+        'features': {
+            'sos_button': True,
+            'live_location_sharing': True,
+            'ai_chatbot': True,
+            'nearby_resources': True,
+            'safe_accommodations': True
+        },
+        'supported_regions': [
+            'Chennai', 'Coimbatore', 'Madurai', 'Tiruchirappalli',
+            'Salem', 'Tirunelveli', 'Vellore', 'Thanjavur',
+            'Kanyakumari', 'Kodaikanal', 'Ooty', 'Pondicherry'
+        ]
+    }), 200
+
+@app.route('/api/statistics')
+def get_statistics():
+    """Get platform statistics"""
+    import sqlite3
+    
+    try:
+        conn = sqlite3.connect(app.config['DATABASE'])
+        cursor = conn.cursor()
+        
+        cursor.execute("SELECT COUNT(*) FROM users")
+        user_count = cursor.fetchone()[0]
+        
+        cursor.execute("SELECT COUNT(*) FROM sos_alerts")
+        total_sos = cursor.fetchone()[0]
+        
+        cursor.execute("SELECT COUNT(*) FROM sos_alerts WHERE status = 'resolved'")
+        resolved_sos = cursor.fetchone()[0]
+        
+        cursor.execute("SELECT COUNT(*) FROM police_stations")
+        police_count = cursor.fetchone()[0]
+        
+        cursor.execute("SELECT COUNT(*) FROM hospitals")
+        hospital_count = cursor.fetchone()[0]
+        
+        cursor.execute("SELECT COUNT(*) FROM safe_zones")
+        safe_zones_count = cursor.fetchone()[0]
+        
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'statistics': {
+                'users': user_count,
+                'sos_alerts': {
+                    'total': total_sos,
+                    'resolved': resolved_sos,
+                    'active': total_sos - resolved_sos
+                },
+                'emergency_resources': {
+                    'police_stations': police_count,
+                    'hospitals': hospital_count,
+                    'safe_zones': safe_zones_count
+                }
+            }
+        }), 200
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+# Error handlers
+@app.errorhandler(404)
+def not_found(error):
+    return jsonify({
+        'error': 'Endpoint not found',
+        'message': 'The requested API endpoint does not exist'
+    }), 404
+
+@app.errorhandler(500)
+def internal_error(error):
+    return jsonify({
+        'error': 'Internal server error',
+        'message': 'An unexpected error occurred. Please try again later.'
+    }), 500
+
+@app.errorhandler(400)
+def bad_request(error):
+    return jsonify({
+        'error': 'Bad request',
+        'message': 'The request data is invalid or malformed'
+    }), 400
+
 if __name__ == '__main__':
-    socketio.run(app, host='0.0.0.0', port=5000, debug=True)
+    # Start Flask server
+    port = int(os.getenv('PORT', 5000))
+    debug = os.getenv('FLASK_ENV', 'development') == 'development'
+    
+    print("\n" + "="*50)
+    print("🚀 Safe Her Travel API Server")
+    print("="*50)
+    print(f"📍 Running on: http://localhost:{port}")
+    print(f"🔧 Debug mode: {debug}")
+    print(f"🗄️ Database: {app.config['DATABASE']}")
+    print("="*50 + "\n")
+    
+    app.run(
+        host='0.0.0.0',
+        port=port,
+        debug=debug
+    )
