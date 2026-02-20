@@ -114,6 +114,17 @@ class _ChatPageState extends State<ChatPage> {
       ),
       body: Column(
         children: [
+          if (_pos != null)
+            Container(
+              width: double.infinity,
+              color: Colors.amber.withOpacity(0.1),
+              padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
+              child: Text(
+                "Debug Loc: ${_pos!.latitude.toStringAsFixed(4)}, ${_pos!.longitude.toStringAsFixed(4)}",
+                style: const TextStyle(fontSize: 10, color: Colors.orange, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              ),
+            ),
           Expanded(
             child: ListView.builder(
               controller: _scrollController,

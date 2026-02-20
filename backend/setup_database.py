@@ -192,6 +192,10 @@ def seed_tamil_nadu_data(conn):
         ('ps_016', 'Madurai City Police Office', 'Tallakulam, Madurai', 'Madurai', 'Madurai', 9.9195, 78.1193, '0452-2534444', 'City Office'),
         ('ps_017', 'Trichy City Police Office', 'Junction, Trichy', 'Tiruchirappalli', 'Tiruchirappalli', 10.8080, 78.6867, '0431-2414100', 'City Office'),
         ('ps_018', 'Salem City Police Office', 'Fort Main Road, Salem', 'Salem', 'Salem', 11.6643, 78.1460, '0427-2413333', 'City Office'),
+        
+        # Thiruvallur (Add these for the user's location)
+        ('ps_019', 'Thiruvallur Town Police Station', 'Kakkalur Road, Thiruvallur', 'Thiruvallur', 'Thiruvallur', 13.1439, 79.9132, '044-27660211', 'Town'),
+        ('ps_020', 'Thiruvallur All Women Police Station', 'Junction Road, Thiruvallur', 'Thiruvallur', 'Thiruvallur', 13.1480, 79.9080, '044-27665411', 'Women'),
     ]
     
     for station in police_stations:
@@ -221,6 +225,10 @@ def seed_tamil_nadu_data(conn):
         ('h_008', 'Mahatma Gandhi Memorial Hospital', 'Srirangam, Trichy', 'Tiruchirappalli', 'Tiruchirappalli', 10.8656, 78.6921, '0431-2770221', '0431-2770221', 'Government', 1),
         ('h_009', 'Government Mohan Kumaramangalam Hospital', 'Steel Plant Road, Salem', 'Salem', 'Salem', 11.6643, 78.1560, '0427-2241111', '0427-2241111', 'Government', 1),
         ('h_010', 'Christian Medical College Vellore', 'Ida Scudder Road, Vellore', 'Vellore', 'Vellore', 12.9252, 79.1344, '0416-2282020', '0416-2282020', 'Medical College', 1),
+        
+        # Thiruvallur
+        ('h_011', 'Govt Headquarters Hospital Thiruvallur', 'Chennai-Tiruttani Highway, Thiruvallur', 'Thiruvallur', 'Thiruvallur', 13.1384, 79.9074, '044-27660311', '044-27660311', 'Government', 1),
+        ('h_012', 'Rishi Hospital', 'MGR Nagar, Thiruvallur', 'Thiruvallur', 'Thiruvallur', 13.1500, 79.9200, '044-27661234', '044-27661234', 'Private', 1),
     ]
     
     for hospital in hospitals:

@@ -2,8 +2,68 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  // For web (chrome), use 127.0.0.1. For Android Emulator, use 10.0.2.2.
-  static const String baseUrl = String.fromEnvironment('API_URL', defaultValue: 'http://127.0.0.1:5000/api');
+  static const String baseUrl = String.fromEnvironment(
+    'API_URL',
+    defaultValue: 'http://127.0.0.1:5000/api',
+  );
+
+  // ─── Auth ──────────────────────────────────────────────────────────────────
+
+  Future<Map<String, dynamic>> sendOtp(String phone) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/user/send-otp'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'phone': phone}),
+      );
+      return jsonDecode(response.body);
+    } catch (e) {
+      return {'success': false, 'error': e.toString()};
+    }
+  }
+
+  Future<Map<String, dynamic>> register({
+    required String name,
+    required String phone,
+    required String city,
+    required List<String> emergencyContacts,
+    required String otp,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/user/register'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'name': name,
+          'phone': phone,
+          'city': city,
+          'emergency_contacts': emergencyContacts,
+          'otp': otp,
+        }),
+      );
+      return jsonDecode(response.body);
+    } catch (e) {
+      return {'success': false, 'error': e.toString()};
+    }
+  }
+
+  Future<Map<String, dynamic>> login({
+    required String phone,
+    required String otp,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/user/login'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'phone': phone, 'otp': otp}),
+      );
+      return jsonDecode(response.body);
+    } catch (e) {
+      return {'success': false, 'error': e.toString()};
+    }
+  }
+
+  // ─── SOS ───────────────────────────────────────────────────────────────────
 
   Future<Map<String, dynamic>> activateSOS({
     required String userId,
@@ -26,6 +86,8 @@ class ApiService {
       return {'success': false, 'error': e.toString()};
     }
   }
+
+  // ─── Chat ──────────────────────────────────────────────────────────────────
 
   Future<Map<String, dynamic>> sendMessage({
     required String userId,
@@ -50,10 +112,14 @@ class ApiService {
     }
   }
 
-  Future<Map<String, dynamic>> getNearbyPolice(double lat, double lng) async {
+  // ─── Resources ─────────────────────────────────────────────────────────────
+
+  Future<Map<String, dynamic>> getNearbyPolice(double lat, double lng,
+      {int radius = 10000}) async {
     try {
       final response = await http.get(
-        Uri.parse('$baseUrl/resources/police-stations?lat=$lat&lng=$lng'),
+        Uri.parse(
+            '$baseUrl/resources/police-stations?lat=$lat&lng=$lng&radius=$radius'),
       );
       return jsonDecode(response.body);
     } catch (e) {
@@ -61,10 +127,12 @@ class ApiService {
     }
   }
 
-  Future<Map<String, dynamic>> getNearbyHospitals(double lat, double lng) async {
+  Future<Map<String, dynamic>> getNearbyHospitals(double lat, double lng,
+      {int radius = 10000}) async {
     try {
       final response = await http.get(
-        Uri.parse('$baseUrl/resources/hospitals?lat=$lat&lng=$lng'),
+        Uri.parse(
+            '$baseUrl/resources/hospitals?lat=$lat&lng=$lng&radius=$radius'),
       );
       return jsonDecode(response.body);
     } catch (e) {
@@ -75,7 +143,58 @@ class ApiService {
   Future<Map<String, dynamic>> getNearbyHotels(double lat, double lng) async {
     try {
       final response = await http.get(
-        Uri.parse('$baseUrl/accommodations/search?lat=$lat&lng=$lng&female_friendly=true'),
+        Uri.parse(
+            '$baseUrl/accommodations/search?lat=$lat&lng=$lng&female_friendly=true'),
+      );
+      return jsonDecode(response.body);
+    } catch (e) {
+      return {'success': false, 'error': e.toString()};
+    }
+  }
+
+  // ─── Community ─────────────────────────────────────────────────────────────
+
+  Future<Map<String, dynamic>> getCommunityPosts() async {
+    try {
+      final response = await http.get(Uri.parse('$baseUrl/community/posts'));
+      return jsonDecode(response.body);
+    } catch (e) {
+      return {'success': false, 'error': e.toString()};
+    }
+  }
+
+  Future<Map<String, dynamic>> createCommunityPost({
+    required String userId,
+    required String userName,
+    required String title,
+    required String content,
+    required String locationName,
+    String category = 'experience',
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/community/posts'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'user_id': userId,
+          'user_name': userName,
+          'title': title,
+          'content': content,
+          'location_name': locationName,
+          'category': category,
+        }),
+      );
+      return jsonDecode(response.body);
+    } catch (e) {
+      return {'success': false, 'error': e.toString()};
+    }
+  }
+
+  Future<Map<String, dynamic>> likePost(String postId) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/community/posts/$postId/like'),
+        headers: {'Content-Type': 'application/json'},
       );
       return jsonDecode(response.body);
     } catch (e) {

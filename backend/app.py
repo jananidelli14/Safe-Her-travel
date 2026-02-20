@@ -26,6 +26,7 @@ from routes.location_routes import location_bp
 from routes.resources_routes import resources_bp
 from routes.chat_routes import chat_bp
 from routes.accommodations_routes import accommodations_bp
+from routes.community_routes import community_bp
 
 # Register blueprints
 app.register_blueprint(user_bp, url_prefix='/api/user')
@@ -34,6 +35,7 @@ app.register_blueprint(location_bp, url_prefix='/api/location')
 app.register_blueprint(resources_bp, url_prefix='/api/resources')
 app.register_blueprint(chat_bp, url_prefix='/api/chat')
 app.register_blueprint(accommodations_bp, url_prefix='/api/accommodations')
+app.register_blueprint(community_bp, url_prefix='/api/community')
 
 # Health check endpoint
 @app.route('/')

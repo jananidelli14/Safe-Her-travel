@@ -150,15 +150,6 @@ class _MapPageState extends State<MapPage> {
                       urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                       userAgentPackageName: 'com.example.safe_her_travel',
                     ),
-                    // Mapillary street-level imagery overlay
-                    Opacity(
-                      opacity: 0.55,
-                      child: TileLayer(
-                        urlTemplate:
-                            'https://tiles.mapillary.com/maps/vtp/mly1_public/2/{z}/{x}/{y}?access_token=$_mapillaryToken',
-                        userAgentPackageName: 'com.example.safe_her_travel',
-                      ),
-                    ),
                     // POI markers
                     MarkerLayer(markers: _markers),
                   ],

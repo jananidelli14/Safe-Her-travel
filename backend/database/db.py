@@ -178,6 +178,8 @@ def seed_tn_data(conn):
         ('ps8', 'Tirunelveli Town Police', 'High Ground Road, Tirunelveli', 'Tirunelveli', 'Tirunelveli', 8.7139, 77.7567, '0462-2501234', 'Town'),
         ('ps9', 'Vellore Fort Police', 'Fort Main Road, Vellore', 'Vellore', 'Vellore', 12.9165, 79.1325, '0416-2222100', 'Fort'),
         ('ps10', 'Thanjavur Central Police', 'South Main Road, Thanjavur', 'Thanjavur', 'Thanjavur', 10.7870, 79.1378, '04362-230100', 'Central'),
+        ('ps11', 'Thiruvallur Town Police Station', 'Kakkalur Road, Thiruvallur', 'Thiruvallur', 'Thiruvallur', 13.1439, 79.9132, '044-27660211', 'Town'),
+        ('ps12', 'Thiruvallur All Women Police Station', 'Junction Road, Thiruvallur', 'Thiruvallur', 'Thiruvallur', 13.1480, 79.9080, '044-27665411', 'Women'),
     ]
     
     for station in police_stations:
@@ -201,7 +203,9 @@ def seed_tn_data(conn):
         ('h7', 'Salem Government Hospital', 'Fort Main Road, Salem', 'Salem', 'Salem', 11.6643, 78.1560, '0427-2241111', '0427-2241111', 'Government', 1),
         ('h8', 'Tirunelveli Medical College', 'High Ground Road, Tirunelveli', 'Tirunelveli', 'Tirunelveli', 8.7300, 77.7100, '0462-2571501', '0462-2571501', 'Government', 1),
         ('h9', 'Christian Medical College Vellore', 'Ida Scudder Road, Vellore', 'Vellore', 'Vellore', 12.9252, 79.1344, '0416-2282020', '0416-2282020', 'Private', 1),
-        ('h10', 'Thanjavur Medical College', 'Medical College Road, Thanjavur', 'Thanjavur', 'Thanjavur', 10.7905, 79.1380, '04362-282251', '04362-282251', 'Government', 1),
+        ('ps10', 'Thanjavur Central Police', 'South Main Road, Thanjavur', 'Thanjavur', 'Thanjavur', 10.7870, 79.1378, '04362-230100', 'Central'),
+        ('h11', 'Government Headquarters Hospital Thiruvallur', 'Chennai-Tiruttani Highway, Thiruvallur', 'Thiruvallur', 'Thiruvallur', 13.1384, 79.9074, '044-27660311', '044-27660311', 'Government', 1),
+        ('h12', 'Rishi Hospital', 'MGR Nagar, Thiruvallur', 'Thiruvallur', 'Thiruvallur', 13.1500, 79.9200, '044-27661234', '044-27661234', 'Private', 1),
     ]
     
     for hospital in hospitals:
