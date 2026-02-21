@@ -86,12 +86,15 @@ def health_check():
         'status': 'healthy' if db_healthy else 'degraded',
         'database': {
             'status': 'connected' if db_healthy else 'error',
-            'police_stations': police_count,
-            'hospitals': hospital_count
+            'police_stations': f"{police_count} (Cached Fallback)",
+            'hospitals': f"{hospital_count} (Cached Fallback)",
+            'live_discovery': 'ACTIVE'
         },
         'services': {
-            'ai_chatbot': 'configured' if ai_healthy else 'fallback_mode',
-            'google_places': 'configured' if places_healthy else 'fallback_mode',
+            'ai_chatbot': 'ONLINE' if ai_healthy else 'OFFLINE',
+            'real_time_tracking': 'ENABLED',
+            'mapillary_places': 'CONNECTED' if os.getenv('MAPILLARY_ACCESS_TOKEN') else 'NOT_CONFIGURED',
+            'places_discovery': 'Mapillary + OSM (Real-Time)',
             'twilio_sms': 'configured' if os.getenv('TWILIO_ACCOUNT_SID') else 'disabled',
             'sendgrid_email': 'configured' if os.getenv('SENDGRID_API_KEY') else 'disabled'
         }

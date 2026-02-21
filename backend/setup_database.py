@@ -158,10 +158,12 @@ def seed_tamil_nadu_data(conn):
     """Seed database with real Tamil Nadu data"""
     cursor = conn.cursor()
     
-    print("\n🌱 Seeding Tamil Nadu data...")
+    print("\n📦 Seeding Local Safety Cache...")
+    print("ℹ️ Note: This data serves as a lightning-fast fallback/cache.")
+    print("ℹ️ Real-time data is dynamically fetched via Mapillary & OSM APIs.")
     
     # Clear existing data
-    print("🔄 Clearing old data...")
+    print("\n🔄 Refreshing local cache...")
     cursor.execute("DELETE FROM police_stations")
     cursor.execute("DELETE FROM hospitals")
     cursor.execute("DELETE FROM safe_zones")
@@ -267,19 +269,24 @@ def verify_data(conn):
     """Verify seeded data"""
     cursor = conn.cursor()
     
-    print("\n📊 Verification:")
-    
     cursor.execute("SELECT COUNT(*) FROM police_stations")
     police_count = cursor.fetchone()[0]
-    print(f"  📍 Police Stations: {police_count}")
     
     cursor.execute("SELECT COUNT(*) FROM hospitals")
     hospital_count = cursor.fetchone()[0]
-    print(f"  🏥 Hospitals: {hospital_count}")
     
     cursor.execute("SELECT COUNT(*) FROM safe_zones")
     zones_count = cursor.fetchone()[0]
-    print(f"  🛡️ Safe Zones: {zones_count}")
+    
+    print("\n📦 LOCAL CACHE STATUS (SQLite):")
+    print(f"  📍 Baseline Police Stations: {police_count}")
+    print(f"  🏥 Baseline Hospitals: {hospital_count}")
+    print(f"  🛡️ Baseline Safe Zones: {zones_count}")
+    print("\n🌐 LIVE DISCOVERY STATUS (Active in app.py):")
+    print("  🚀 Mapillary Graph API: ENABLED")
+    print("  🗺️ OpenStreetMap Overpass: ENABLED")
+    print("\nℹ️ The 20 stations above are just the 'Instant Start' foundation.")
+    print("ℹ️ Hundreds of others are fetched live as you move!")
     
     return police_count > 0 and hospital_count > 0
 

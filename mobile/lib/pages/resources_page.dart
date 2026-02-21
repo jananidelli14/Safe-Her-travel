@@ -51,33 +51,49 @@ class _ResourcesPageState extends State<ResourcesPage> with TickerProviderStateM
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FE),
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Safety Resources', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
-        backgroundColor: const Color(0xFF1A0533),
+        title: const Text('Safety Resources', 
+            style: TextStyle(fontWeight: FontWeight.w900, color: Color(0xFF1F1F1F), fontSize: 22, letterSpacing: -0.5)),
+        backgroundColor: Colors.white,
         elevation: 0,
+        centerTitle: false,
         actions: [
-          IconButton(onPressed: _loadResources, icon: const Icon(Icons.refresh, color: Colors.white)),
+          Container(
+            margin: const EdgeInsets.only(right: 16),
+            decoration: BoxDecoration(color: const Color(0xFFF2F2F7), borderRadius: BorderRadius.circular(12)),
+            child: IconButton(onPressed: _loadResources, icon: const Icon(Icons.refresh_rounded, color: Color(0xFF5D3891))),
+          ),
         ],
-        bottom: TabBar(
-          controller: _tabController,
-          labelColor: Colors.white,
-          unselectedLabelColor: Colors.white60,
-          indicatorColor: const Color(0xFFFF4D6D),
-          indicatorWeight: 3,
-          tabs: const [
-            Tab(icon: Icon(Icons.security), text: 'Police'),
-            Tab(icon: Icon(Icons.local_hospital), text: 'Hospitals'),
-          ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(60),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: TabBar(
+              controller: _tabController,
+              labelColor: Colors.white,
+              unselectedLabelColor: const Color(0xFF8E8E93),
+              indicatorSize: TabBarIndicatorSize.tab,
+              indicator: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                color: const Color(0xFF5D3891),
+              ),
+              dividerColor: Colors.transparent,
+              tabs: const [
+                Tab(child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.local_police_rounded, size: 18), SizedBox(width: 8), Text('Police')])),
+                Tab(child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.emergency_rounded, size: 18), SizedBox(width: 8), Text('Hospitals')])),
+              ],
+            ),
+          ),
         ),
       ),
       body: _isLoading 
-        ? const Center(child: CircularProgressIndicator())
+        ? const Center(child: CircularProgressIndicator(color: Color(0xFF5D3891)))
         : TabBarView(
             controller: _tabController,
             children: [
-              _buildList(_police, Icons.policy_rounded, Colors.blue),
-              _buildList(_hospitals, Icons.local_hospital_rounded, Colors.red),
+              _buildList(_police, Icons.local_police_rounded, const Color(0xFF2D31FA)),
+              _buildList(_hospitals, Icons.emergency_rounded, const Color(0xFFE71C23)),
             ],
           ),
     );
@@ -86,34 +102,42 @@ class _ResourcesPageState extends State<ResourcesPage> with TickerProviderStateM
   Widget _buildList(List<dynamic> items, IconData icon, Color color) {
     if (items.isEmpty) {
       return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.search_off_rounded, size: 64, color: Colors.grey.withOpacity(0.5)),
-            const SizedBox(height: 16),
-            const Text('No resources found nearby', style: TextStyle(color: Colors.grey, fontSize: 16)),
-            const Text('Try refreshing or check location permission', style: TextStyle(color: Colors.grey, fontSize: 12)),
-          ],
+        child: Padding(
+          padding: const EdgeInsets.all(32.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.location_off_rounded, size: 80, color: const Color(0xFFF2F2F7)),
+              const SizedBox(height: 24),
+              const Text('No resources found nearby', 
+                  style: TextStyle(color: Color(0xFF1F1F1F), fontSize: 18, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              const Text('Try refreshing or checking your location permissions.', 
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Color(0xFF8E8E93), fontSize: 14)),
+            ],
+          ),
         ),
       );
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
       itemCount: items.length,
       itemBuilder: (ctx, i) => _resourceCard(items[i], icon, color),
     );
   }
 
   Widget _resourceCard(dynamic item, IconData icon, Color color) {
-    final dist = item['distance_km'] != null ? '${(item['distance_km'] as double).toStringAsFixed(2)} km' : 'Nearby';
+    final dist = item['distance_km'] != null ? '${(item['distance_km'] as double).toStringAsFixed(1)} km' : 'Nearby';
     
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10, offset: const Offset(0, 4))],
+        border: Border.all(color: const Color(0xFFF2F2F7)),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4))],
       ),
       child: Material(
         color: Colors.transparent,
@@ -126,7 +150,7 @@ class _ResourcesPageState extends State<ResourcesPage> with TickerProviderStateM
               children: [
                 Container(
                   padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(16)),
+                  decoration: BoxDecoration(color: color.withOpacity(0.08), borderRadius: BorderRadius.circular(16)),
                   child: Icon(icon, color: color, size: 28),
                 ),
                 const SizedBox(width: 16),
@@ -134,22 +158,25 @@ class _ResourcesPageState extends State<ResourcesPage> with TickerProviderStateM
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(item['name'] ?? 'Unknown', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xFF1A0533))),
+                      Text(item['name'] ?? 'Unknown', 
+                          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: Color(0xFF1F1F1F))),
                       const SizedBox(height: 4),
-                      Text(item['address'] ?? 'Tamil Nadu, India', style: const TextStyle(color: Colors.grey, fontSize: 12), maxLines: 1, overflow: TextOverflow.ellipsis),
+                      Text(item['address'] ?? 'Tamil Nadu, India', 
+                          style: const TextStyle(color: Color(0xFF8E8E93), fontSize: 13), maxLines: 1, overflow: TextOverflow.ellipsis),
                     ],
                   ),
                 ),
+                const SizedBox(width: 8),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(color: const Color(0xFF06D6A0).withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
-                      child: Text(dist, style: const TextStyle(color: Color(0xFF06D6A0), fontWeight: FontWeight.bold, fontSize: 11)),
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(color: const Color(0xFFF2F2F7), borderRadius: BorderRadius.circular(10)),
+                      child: Text(dist, style: const TextStyle(color: Color(0xFF1F1F1F), fontWeight: FontWeight.w900, fontSize: 11)),
                     ),
                     const SizedBox(height: 8),
-                    const Icon(Icons.directions_rounded, color: Color(0xFF6C3DE0), size: 20),
+                    const Text('GET INFO', style: TextStyle(color: Color(0xFF5D3891), fontWeight: FontWeight.w900, fontSize: 10)),
                   ],
                 ),
               ],

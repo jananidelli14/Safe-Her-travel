@@ -48,112 +48,60 @@ class _HotelsPageState extends State<HotelsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: CustomScrollView(
+        physics: const BouncingScrollPhysics(),
         slivers: [
           SliverAppBar(
-            expandedHeight: 160,
+            expandedHeight: 140,
             pinned: true,
+            elevation: 0,
+            backgroundColor: Colors.white,
             flexibleSpace: FlexibleSpaceBar(
               background: Container(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Color(0xFFFFB703), Color(0xFFFB8500)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                ),
+                decoration: const BoxDecoration(color: Colors.white),
                 child: SafeArea(
                   child: Padding(
-                    padding: const EdgeInsets.all(20),
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        const Text("🏨 Safe Hotels", style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
-                        const Text("AI-vetted female-friendly stays", style: TextStyle(color: Colors.white70)),
-                        const SizedBox(height: 8),
-                        Row(
-                          children: [
-                            _chip(Icons.verified, "Safety Verified"),
-                            const SizedBox(width: 8),
-                            _chip(Icons.star, "Google Reviews"),
-                          ],
-                        ),
+                        const Text("Elite Stays", style: TextStyle(color: Color(0xFF1F1F1F), fontSize: 24, fontWeight: FontWeight.w900, letterSpacing: -0.5)),
+                        const SizedBox(height: 4),
+                        Text("Safety-vetted hotels for women travelers", style: TextStyle(color: const Color(0xFF8E8E93), fontSize: 13, fontWeight: FontWeight.w500)),
                       ],
                     ),
                   ),
                 ),
               ),
             ),
+            actions: [
+              Padding(
+                padding: const EdgeInsets.only(right: 16),
+                child: IconButton(
+                  onPressed: _fetchHotels,
+                  icon: const Icon(Icons.refresh_rounded, color: Color(0xFF5D3891)),
+                ),
+              ),
+            ],
           ),
 
           if (_isLoading)
             const SliverFillRemaining(
-              child: Center(child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircularProgressIndicator(color: Color(0xFFFFB703)),
-                  SizedBox(height: 16),
-                  Text("Finding safe hotels nearby..."),
-                ],
-              )),
+              child: Center(child: CircularProgressIndicator(color: Color(0xFF5D3891))),
             )
           else if (_error != null)
             SliverFillRemaining(
-              child: Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(32),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.hotel, size: 64, color: Colors.grey),
-                      const SizedBox(height: 16),
-                      Text(_error!, textAlign: TextAlign.center, style: const TextStyle(color: Colors.grey)),
-                      const SizedBox(height: 24),
-                      ElevatedButton.icon(
-                        onPressed: _fetchHotels,
-                        icon: const Icon(Icons.refresh),
-                        label: const Text("Try Again"),
-                        style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFFFB703)),
-                      ),
-                      const SizedBox(height: 12),
-                      const Text(
-                        "Note: Hotel search requires GOOGLE_PLACES_API_KEY in the backend .env file.",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.grey, fontSize: 12),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+              child: _buildError(),
             )
           else if (_hotels.isEmpty)
             SliverFillRemaining(
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.search_off, size: 64, color: Colors.grey),
-                    const SizedBox(height: 16),
-                    const Text("No hotels found nearby", style: TextStyle(color: Colors.grey)),
-                    const SizedBox(height: 8),
-                    const Text("Add your GOOGLE_PLACES_API_KEY to backend/.env for live results",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.grey, fontSize: 12)),
-                    const SizedBox(height: 24),
-                    ElevatedButton.icon(
-                      onPressed: _fetchHotels,
-                      icon: const Icon(Icons.refresh),
-                      label: const Text("Refresh"),
-                      style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFFFB703)),
-                    ),
-                  ],
-                ),
-              ),
+              child: _buildEmpty(),
             )
           else
             SliverPadding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
               sliver: SliverList(
                 delegate: SliverChildBuilderDelegate(
                   (ctx, index) => _buildHotelCard(_hotels[index]),
@@ -166,24 +114,6 @@ class _HotelsPageState extends State<HotelsPage> {
     );
   }
 
-  Widget _chip(IconData icon, String label) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.25),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 12, color: Colors.white),
-          const SizedBox(width: 4),
-          Text(label, style: const TextStyle(color: Colors.white, fontSize: 11)),
-        ],
-      ),
-    );
-  }
-
   Widget _buildHotelCard(dynamic hotel) {
     final rating = hotel['rating'] ?? hotel['safety_rating'] ?? 0.0;
     final ratingNum = rating is num ? rating.toDouble() : 0.0;
@@ -191,74 +121,109 @@ class _HotelsPageState extends State<HotelsPage> {
     final priceSigns = '\$' * (priceLevel is int ? priceLevel.clamp(1, 4) : 2);
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: 24),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 12, offset: const Offset(0, 4))],
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: const Color(0xFFF2F2F7)),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 20, offset: const Offset(0, 8))],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ClipRRect(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-            child: Container(
-              height: 120,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [const Color(0xFFFFB703).withOpacity(0.3), const Color(0xFFFB8500).withOpacity(0.2)],
-                ),
-              ),
-              child: const Center(child: Icon(Icons.hotel_rounded, size: 48, color: Color(0xFFFFB703))),
-            ),
-          ),
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(child: Text(hotel['name'] ?? 'Hotel', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
+                    Expanded(child: Text(hotel['name'] ?? 'Hotel', style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 18, color: Color(0xFF1F1F1F), letterSpacing: -0.5))),
+                    const SizedBox(width: 12),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(color: Colors.amber.withOpacity(0.15), borderRadius: BorderRadius.circular(8)),
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(color: const Color(0xFFF9A826).withOpacity(0.08), borderRadius: BorderRadius.circular(10)),
                       child: Row(
                         children: [
-                          const Icon(Icons.star, size: 14, color: Colors.amber),
-                          const SizedBox(width: 2),
-                          Text(ratingNum.toStringAsFixed(1), style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.amber)),
+                          const Icon(Icons.star_rounded, size: 16, color: Color(0xFFF9A826)),
+                          const SizedBox(width: 4),
+                          Text(ratingNum.toStringAsFixed(1), style: const TextStyle(fontWeight: FontWeight.w900, color: Color(0xFFF9A826), fontSize: 13)),
                         ],
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 4),
-                Text(hotel['address'] ?? hotel['vicinity'] ?? '', style: const TextStyle(color: Colors.grey, fontSize: 12)),
-                const SizedBox(height: 12),
+                const SizedBox(height: 6),
+                Row(
+                  children: [
+                    const Icon(Icons.place_rounded, size: 14, color: Color(0xFF8E8E93)),
+                    const SizedBox(width: 4),
+                    Expanded(child: Text(hotel['address'] ?? hotel['vicinity'] ?? '', 
+                        style: const TextStyle(color: Color(0xFF8E8E93), fontSize: 12, fontWeight: FontWeight.w500))),
+                  ],
+                ),
+                const SizedBox(height: 20),
                 Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(color: const Color(0xFF06D6A0).withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(color: const Color(0xFF00ADB5).withOpacity(0.08), borderRadius: BorderRadius.circular(12)),
                       child: const Row(
                         children: [
-                          Icon(Icons.verified, size: 12, color: Color(0xFF06D6A0)),
-                          SizedBox(width: 4),
-                          Text("Safety Verified", style: TextStyle(color: Color(0xFF06D6A0), fontSize: 11, fontWeight: FontWeight.bold)),
+                          Icon(Icons.verified_user_rounded, size: 14, color: Color(0xFF00ADB5)),
+                          SizedBox(width: 6),
+                          Text("Safety Vetted", style: TextStyle(color: Color(0xFF00ADB5), fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 0.3)),
                         ],
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    Text(priceSigns, style: const TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)),
+                    const Spacer(),
+                    Text(priceSigns, style: const TextStyle(color: Color(0xFF1F1F1F), fontWeight: FontWeight.w900, fontSize: 14)),
                   ],
                 ),
               ],
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildEmpty() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(40),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.hotel_outlined, size: 60, color: const Color(0xFFF2F2F7)),
+            const SizedBox(height: 24),
+            const Text('No Hotels Found', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 20, color: Color(0xFF1F1F1F))),
+            const SizedBox(height: 8),
+            const Text('Add your Google Places API Key to the backend for real-time vetted results.',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Color(0xFF8E8E93), fontSize: 14)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildError() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline_rounded, size: 48, color: Color(0xFFE71C23)),
+            const SizedBox(height: 16),
+            Text(_error!, textAlign: TextAlign.center, style: const TextStyle(color: Color(0xFF8E8E93), fontSize: 14)),
+            const SizedBox(height: 24),
+            TextButton.icon(onPressed: _fetchHotels, icon: const Icon(Icons.refresh_rounded), label: const Text('Try Again')),
+          ],
+        ),
       ),
     );
   }

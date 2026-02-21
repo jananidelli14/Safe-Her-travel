@@ -15,17 +15,22 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
   final ApiService _api = ApiService();
   final _phoneCtrl = TextEditingController();
   final _otpCtrl = TextEditingController();
+  final _emailCtrl = TextEditingController();
+  final _passCtrl = TextEditingController();
+  
+  bool _isOtpMode = true;
   bool _otpSent = false;
   bool _loading = false;
   String? _error;
   String? _demoOtp;
+  
   late AnimationController _animController;
   late Animation<double> _fadeIn;
 
   @override
   void initState() {
     super.initState();
-    _animController = AnimationController(vsync: this, duration: const Duration(milliseconds: 800));
+    _animController = AnimationController(vsync: this, duration: const Duration(milliseconds: 600));
     _fadeIn = CurvedAnimation(parent: _animController, curve: Curves.easeOut);
     _animController.forward();
   }
@@ -35,6 +40,8 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
     _animController.dispose();
     _phoneCtrl.dispose();
     _otpCtrl.dispose();
+    _emailCtrl.dispose();
+    _passCtrl.dispose();
     super.dispose();
   }
 
@@ -59,12 +66,23 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
   }
 
   Future<void> _login() async {
-    if (_otpCtrl.text.trim().length != 6) {
-      setState(() => _error = 'Enter the 6-digit OTP');
-      return;
-    }
     setState(() { _loading = true; _error = null; });
-    final res = await _api.login(phone: _phoneCtrl.text.trim(), otp: _otpCtrl.text.trim());
+    
+    Map<String, dynamic> res;
+    if (_isOtpMode) {
+      if (_otpCtrl.text.trim().length != 6) {
+        setState(() { _loading = false; _error = 'Enter 6-digit OTP'; });
+        return;
+      }
+      res = await _api.login(phone: _phoneCtrl.text.trim(), otp: _otpCtrl.text.trim());
+    } else {
+      if (_emailCtrl.text.isEmpty || _passCtrl.text.isEmpty) {
+        setState(() { _loading = false; _error = 'Enter email and password'; });
+        return;
+      }
+      res = await _api.loginWithEmail(email: _emailCtrl.text.trim(), password: _passCtrl.text);
+    }
+
     if (mounted) {
       setState(() => _loading = false);
       if (res['success'] == true) {
@@ -79,142 +97,138 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF1A0533), Color(0xFF3B0F6F), Color(0xFF6C3DE0)],
-            stops: [0.0, 0.5, 1.0],
-          ),
-        ),
-        child: SafeArea(
-          child: FadeTransition(
-            opacity: _fadeIn,
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 40),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const SizedBox(height: 20),
-                  // Logo
-                  Center(
-                    child: Container(
-                      width: 90, height: 90,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: const RadialGradient(colors: [Color(0xFFFF4D6D), Color(0xFF9B0038)]),
-                        boxShadow: [BoxShadow(color: Colors.redAccent.withOpacity(0.5), blurRadius: 30, spreadRadius: 5)],
-                      ),
-                      child: const Icon(Icons.shield_rounded, color: Colors.white, size: 44),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  const Text('Safe Her Travel', textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w800, letterSpacing: 0.5)),
-                  const SizedBox(height: 6),
-                  Text('Your safety companion in Tamil Nadu', textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.white.withOpacity(0.65), fontSize: 13)),
-                  const SizedBox(height: 48),
-
-                  // Card
-                  Container(
-                    padding: const EdgeInsets.all(28),
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: FadeTransition(
+          opacity: _fadeIn,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 40),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const SizedBox(height: 20),
+                // Professional Logo
+                Center(
+                  child: Container(
+                    width: 100, height: 100,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.07),
-                      borderRadius: BorderRadius.circular(28),
-                      border: Border.all(color: Colors.white.withOpacity(0.15)),
+                      color: const Color(0xFF5D3891).withOpacity(0.05),
+                      shape: BoxShape.circle,
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        const Text('Welcome Back', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
-                        const SizedBox(height: 6),
-                        Text('Login with your phone number + OTP', style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 12)),
-                        const SizedBox(height: 24),
-
-                        // Phone field
-                        _buildField(
-                          controller: _phoneCtrl,
-                          label: 'Phone Number',
-                          icon: Icons.phone_outlined,
-                          keyboardType: TextInputType.phone,
-                          enabled: !_otpSent,
-                        ),
-                        const SizedBox(height: 16),
-
-                        if (_otpSent) ...[
-                          _buildField(
-                            controller: _otpCtrl,
-                            label: 'Enter OTP',
-                            icon: Icons.lock_outline_rounded,
-                            keyboardType: TextInputType.number,
-                          ),
-                          if (_demoOtp != null)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 8),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                                decoration: BoxDecoration(
-                                  color: Colors.amber.withOpacity(0.15),
-                                  borderRadius: BorderRadius.circular(10),
-                                  border: Border.all(color: Colors.amber.withOpacity(0.4)),
-                                ),
-                                child: Row(
-                                  children: [
-                                    const Icon(Icons.info_outline, color: Colors.amber, size: 16),
-                                    const SizedBox(width: 8),
-                                    Text('Demo OTP: $_demoOtp', style: const TextStyle(color: Colors.amber, fontWeight: FontWeight.bold, fontSize: 13)),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          const SizedBox(height: 16),
-                        ],
-
-                        if (_error != null)
-                          Container(
-                            margin: const EdgeInsets.only(bottom: 12),
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: Colors.red.withOpacity(0.15),
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(color: Colors.red.withOpacity(0.4)),
-                            ),
-                            child: Text(_error!, style: const TextStyle(color: Colors.red, fontSize: 13)),
-                          ),
-
-                        _buildGradientButton(
-                          label: _loading ? 'Please wait...' : (_otpSent ? 'Login' : 'Send OTP'),
-                          onTap: _loading ? null : (_otpSent ? _login : _sendOtp),
-                          icon: _otpSent ? Icons.login_rounded : Icons.send_rounded,
-                        ),
-
-                        if (_otpSent)
-                          TextButton(
-                            onPressed: () => setState(() { _otpSent = false; _otpCtrl.clear(); _error = null; }),
-                            child: Text('Change number', style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 12)),
-                          ),
-                      ],
-                    ),
+                    child: const Icon(Icons.shield_rounded, color: Color(0xFF5D3891), size: 48),
                   ),
-                  const SizedBox(height: 24),
+                ),
+                const SizedBox(height: 32),
+                const Text('Safe Her Travel', textAlign: TextAlign.center,
+                    style: TextStyle(color: Color(0xFF1F1F1F), fontSize: 28, fontWeight: FontWeight.w900, letterSpacing: -0.5)),
+                const SizedBox(height: 8),
+                const Text('Tamil Nadu\'s trusted safety companion', textAlign: TextAlign.center,
+                    style: TextStyle(color: Color(0xFF666666), fontSize: 14)),
+                const SizedBox(height: 48),
 
-                  // Sign up CTA
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                // Mode Toggle
+                Container(
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF5F5F7),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
                     children: [
-                      Text("New to Safe Her? ", style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 13)),
-                      GestureDetector(
-                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SignupPage(onSignupSuccess: widget.onLoginSuccess))),
-                        child: const Text('Sign Up', style: TextStyle(color: Color(0xFFFF4D6D), fontWeight: FontWeight.bold, fontSize: 13)),
-                      ),
+                      _buildToggleButton(label: 'OTP Login', active: _isOtpMode, onTap: () => setState(() { _isOtpMode = true; _error = null; })),
+                      _buildToggleButton(label: 'Email Login', active: !_isOtpMode, onTap: () => setState(() { _isOtpMode = false; _error = null; })),
                     ],
                   ),
+                ),
+                const SizedBox(height: 32),
+
+                if (_isOtpMode) ...[
+                  _buildField(
+                    controller: _phoneCtrl,
+                    label: 'Phone Number',
+                    icon: Icons.phone_android_rounded,
+                    keyboardType: TextInputType.phone,
+                    enabled: !_otpSent,
+                  ),
+                  if (_otpSent) ...[
+                    const SizedBox(height: 16),
+                    _buildField(
+                      controller: _otpCtrl,
+                      label: 'Enter 6-digit OTP',
+                      icon: Icons.lock_outline_rounded,
+                      keyboardType: TextInputType.number,
+                    ),
+                    if (_demoOtp != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 12),
+                        child: Text('Demo OTP: $_demoOtp', textAlign: TextAlign.center, style: const TextStyle(color: Colors.orange, fontWeight: FontWeight.bold, fontSize: 13)),
+                      ),
+                  ],
+                ] else ...[
+                  _buildField(
+                    controller: _emailCtrl,
+                    label: 'Email Address',
+                    icon: Icons.email_outlined,
+                    keyboardType: TextInputType.emailAddress,
+                  ),
+                  const SizedBox(height: 16),
+                  _buildField(
+                    controller: _passCtrl,
+                    label: 'Password',
+                    icon: Icons.lock_outline_rounded,
+                    isPassword: true,
+                  ),
                 ],
-              ),
+                
+                const SizedBox(height: 24),
+                if (_error != null)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: Text(_error!, textAlign: TextAlign.center, style: const TextStyle(color: Color(0xFFE71C23), fontSize: 13, fontWeight: FontWeight.w600)),
+                  ),
+
+                _buildPrimaryButton(
+                  label: _loading ? 'Please wait...' : (_isOtpMode && !_otpSent ? 'Send OTP' : 'Login'),
+                  onTap: _loading ? null : (_isOtpMode && !_otpSent ? _sendOtp : _login),
+                ),
+
+                if (_isOtpMode && _otpSent)
+                  TextButton(
+                    onPressed: () => setState(() { _otpSent = false; _otpCtrl.clear(); }),
+                    child: const Text('Change phone number', style: TextStyle(color: Color(0xFF5D3891), fontWeight: FontWeight.w600)),
+                  ),
+
+                const SizedBox(height: 40),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text("Don't have an account? ", style: TextStyle(color: Color(0xFF666666))),
+                    GestureDetector(
+                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SignupPage(onSignupSuccess: widget.onLoginSuccess))),
+                      child: const Text('Sign Up', style: TextStyle(color: Color(0xFF5D3891), fontWeight: FontWeight.w800)),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildToggleButton({required String label, required bool active, required VoidCallback onTap}) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          decoration: BoxDecoration(
+            color: active ? Colors.white : Colors.transparent,
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: active ? [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 2))] : null,
+          ),
+          alignment: Alignment.center,
+          child: Text(label, style: TextStyle(color: active ? const Color(0xFF5D3891) : const Color(0xFF8E8E93), fontWeight: active ? FontWeight.bold : FontWeight.normal, fontSize: 13)),
         ),
       ),
     );
@@ -226,22 +240,23 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
     required IconData icon,
     TextInputType keyboardType = TextInputType.text,
     bool enabled = true,
+    bool isPassword = false,
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(enabled ? 0.1 : 0.04),
+        color: const Color(0xFFF2F2F7),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withOpacity(0.2)),
       ),
       child: TextField(
         controller: controller,
         enabled: enabled,
         keyboardType: keyboardType,
-        style: const TextStyle(color: Colors.white),
+        obscureText: isPassword,
+        style: const TextStyle(color: Color(0xFF1F1F1F)),
         decoration: InputDecoration(
           labelText: label,
-          labelStyle: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 13),
-          prefixIcon: Icon(icon, color: Colors.white.withOpacity(0.6), size: 20),
+          labelStyle: const TextStyle(color: Color(0xFF8E8E93), fontSize: 14),
+          prefixIcon: Icon(icon, color: const Color(0xFF8E8E93), size: 20),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         ),
@@ -249,25 +264,17 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
     );
   }
 
-  Widget _buildGradientButton({required String label, required VoidCallback? onTap, required IconData icon}) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 52,
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(colors: [Color(0xFFFF4D6D), Color(0xFF9B0038)]),
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [BoxShadow(color: Colors.red.withOpacity(0.4), blurRadius: 16, offset: const Offset(0, 6))],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, color: Colors.white, size: 18),
-            const SizedBox(width: 8),
-            Text(label, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
-          ],
-        ),
+  Widget _buildPrimaryButton({required String label, required VoidCallback? onTap}) {
+    return ElevatedButton(
+      onPressed: onTap,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color(0xFF5D3891),
+        foregroundColor: Colors.white,
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        elevation: 0,
       ),
+      child: Text(label, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
     );
   }
 }

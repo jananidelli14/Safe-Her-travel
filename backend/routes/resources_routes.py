@@ -3,7 +3,7 @@ Resources Routes - Merged Data (DB + OSM)
 """
 
 from flask import Blueprint, request, jsonify
-from services.mapillary_service import search_pois_overpass, haversine
+from services.mapillary_service import search_pois_overpass, search_pois_mapillary, haversine
 from database.db import get_db_connection
 
 resources_bp = Blueprint('resources', __name__)
@@ -34,21 +34,32 @@ def get_db_resources(table, lat, lng, radius_km):
 
 @resources_bp.route('/police-stations', methods=['GET'])
 def get_police_stations():
+    """Fetch nearby police stations from all sources (Mapillary + OSM + Cache)."""
     try:
         lat = float(request.args.get('lat'))
         lng = float(request.args.get('lng'))
-        radius_m = int(request.args.get('radius', 10000))
+        # Default to 30km for comprehensive coverage
+        radius_m = int(request.args.get('radius', 30000))
         radius_km = radius_m / 1000
 
-        # 1. Try Live OSM data
-        stations = search_pois_overpass(lat, lng, 'police', radius_m)
+        print(f"[RESOURCES] 🚓 Searching Police for {lat},{lng} (Radius: {radius_m}m)")
         
-        # 2. Add local DB data (fallback/seed)
+        # 1. Fetch Priority Live Data
+        # Try OSM (usually most complete)
+        osm_stations = search_pois_overpass(lat, lng, 'police', radius_m)
+        # Try Mapillary (street-view verified)
+        mapillary_stations = search_pois_mapillary(lat, lng, 'police', radius_m)
+        
+        # 2. Add local DB data (baseline cache)
         db_stations = get_db_resources('police_stations', lat, lng, radius_km)
         
-        # Merge and remove duplicates by ID or name
-        merged = {s['name'].lower(): s for s in db_stations}
-        for s in stations:
+        # 3. Merge and deduplicate by name (ignore case)
+        merged = {}
+        for s in db_stations:
+            merged[s['name'].lower()] = s
+        for s in osm_stations:
+            merged[s['name'].lower()] = s
+        for s in mapillary_stations:
             merged[s['name'].lower()] = s
             
         final_list = sorted(merged.values(), key=lambda x: x['distance_km'])
@@ -56,31 +67,42 @@ def get_police_stations():
         return jsonify({
             'success': True,
             'count': len(final_list),
-            'resources': final_list,
-            'source': 'Merged (OSM + DB)',
+            'stations': final_list,
+            'source': 'Live Discovery (Mapillary + OSM + Cache)',
+            'radius_m': radius_m,
             'user_location': {'lat': lat, 'lng': lng}
         }), 200
     except Exception as e:
+        print(f"[RESOURCES ERROR] Police: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
 @resources_bp.route('/hospitals', methods=['GET'])
 def get_hospitals():
+    """Fetch nearby hospitals from all sources (Mapillary + OSM + Cache)."""
     try:
         lat = float(request.args.get('lat'))
         lng = float(request.args.get('lng'))
-        radius_m = int(request.args.get('radius', 10000))
+        # Default to 30km for comprehensive coverage
+        radius_m = int(request.args.get('radius', 30000))
         radius_km = radius_m / 1000
 
-        # 1. Try Live OSM data
-        hospitals = search_pois_overpass(lat, lng, 'hospital', radius_m)
+        print(f"[RESOURCES] 🏥 Searching Hospitals for {lat},{lng} (Radius: {radius_m}m)")
         
-        # 2. Add local DB data (fallback/seed)
+        # 1. Fetch Priority Live Data
+        osm_hospitals = search_pois_overpass(lat, lng, 'hospital', radius_m)
+        mapillary_hospitals = search_pois_mapillary(lat, lng, 'hospital', radius_m)
+        
+        # 2. Add local DB data (baseline cache)
         db_hospitals = get_db_resources('hospitals', lat, lng, radius_km)
         
-        # Merge
-        merged = {h['name'].lower(): h for h in db_hospitals}
-        for h in hospitals:
+        # 3. Merge and deduplicate by name (ignore case)
+        merged = {}
+        for h in db_hospitals:
+            merged[h['name'].lower()] = h
+        for h in osm_hospitals:
+            merged[h['name'].lower()] = h
+        for h in mapillary_hospitals:
             merged[h['name'].lower()] = h
             
         final_list = sorted(merged.values(), key=lambda x: x['distance_km'])
@@ -88,11 +110,13 @@ def get_hospitals():
         return jsonify({
             'success': True,
             'count': len(final_list),
-            'resources': final_list,
-            'source': 'Merged (OSM + DB)',
+            'hospitals': final_list,
+            'source': 'Live Discovery (Mapillary + OSM + Cache)',
+            'radius_m': radius_m,
             'user_location': {'lat': lat, 'lng': lng}
         }), 200
     except Exception as e:
+        print(f"[RESOURCES ERROR] Hospitals: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
 

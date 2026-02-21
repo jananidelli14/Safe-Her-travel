@@ -74,7 +74,7 @@ def activate_sos():
             'sos_id': sos_id,
             'message': 'SOS activated successfully',
             'police_station': police_response,
-            'eta_minutes': 6,
+            'eta_minutes': police_response.get('eta_minutes', 6),
             'status': 'active'
         }), 200
         

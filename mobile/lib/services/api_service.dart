@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 class ApiService {
   static const String baseUrl = String.fromEnvironment(
     'API_URL',
-    defaultValue: 'http://127.0.0.1:5000/api',
+    defaultValue: 'http://localhost:5000/api',
   );
 
   // ─── Auth ──────────────────────────────────────────────────────────────────
@@ -24,6 +24,7 @@ class ApiService {
 
   Future<Map<String, dynamic>> register({
     required String name,
+    required String email,
     required String phone,
     required String city,
     required List<String> emergencyContacts,
@@ -35,6 +36,7 @@ class ApiService {
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'name': name,
+          'email': email,
           'phone': phone,
           'city': city,
           'emergency_contacts': emergencyContacts,
@@ -56,6 +58,22 @@ class ApiService {
         Uri.parse('$baseUrl/user/login'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'phone': phone, 'otp': otp}),
+      );
+      return jsonDecode(response.body);
+    } catch (e) {
+      return {'success': false, 'error': e.toString()};
+    }
+  }
+
+  Future<Map<String, dynamic>> loginWithEmail({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/user/login'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email, 'password': password}),
       );
       return jsonDecode(response.body);
     } catch (e) {

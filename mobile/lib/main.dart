@@ -23,19 +23,27 @@ class SafeHerApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF6C3DE0),
+          seedColor: const Color(0xFF5D3891), // Professional Purple
           brightness: Brightness.light,
         ).copyWith(
-          primary: const Color(0xFF6C3DE0),
-          secondary: const Color(0xFFFF4D6D),
-          tertiary: const Color(0xFF06D6A0),
-          surface: const Color(0xFFF5F3FF),
+          primary: const Color(0xFF5D3891),
+          secondary: const Color(0xFFE71C23), // SOS Red
+          tertiary: const Color(0xFF00ADB5), // Professional Teal
+          surface: Colors.white,
         ),
+        scaffoldBackgroundColor: Colors.white,
         useMaterial3: true,
         fontFamily: 'Roboto',
-        cardTheme: CardThemeData(
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.white,
           elevation: 0,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          iconTheme: IconThemeData(color: Color(0xFF2D31FA)),
+        ),
+        cardTheme: CardThemeData(
+          elevation: 2,
+          color: Colors.white,
+          shadowColor: Colors.black.withOpacity(0.1),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         ),
       ),
       home: const AuthGate(),
@@ -85,14 +93,14 @@ class _AuthGateState extends State<AuthGate> {
   Widget build(BuildContext context) {
     if (_checking) {
       return const Scaffold(
-        backgroundColor: Color(0xFF1A0533),
+        backgroundColor: Colors.white,
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.shield_rounded, color: Color(0xFFFF4D6D), size: 56),
-              SizedBox(height: 20),
-              CircularProgressIndicator(color: Color(0xFF6C3DE0)),
+              Icon(Icons.shield_rounded, color: Color(0xFFE71C23), size: 64),
+              SizedBox(height: 24),
+              CircularProgressIndicator(color: Color(0xFF5D3891)),
             ],
           ),
         ),
@@ -170,7 +178,7 @@ class _MainShellState extends State<MainShell> {
 
   Widget _navItem(int index, IconData icon, IconData activeIcon, String label, {bool highlight = false}) {
     final isActive = _selectedIndex == index;
-    final activeColor = highlight ? const Color(0xFFFF4D6D) : const Color(0xFF6C3DE0);
+    final activeColor = highlight ? const Color(0xFFE71C23) : const Color(0xFF5D3891);
     return GestureDetector(
       onTap: () => setState(() => _selectedIndex = index),
       behavior: HitTestBehavior.opaque,

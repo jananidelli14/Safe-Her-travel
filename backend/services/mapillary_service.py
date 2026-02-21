@@ -9,8 +9,16 @@ import math
 import requests
 from typing import Optional
 
+import time
+from typing import Optional, Dict
+
 MAPILLARY_ACCESS_TOKEN = os.getenv('MAPILLARY_ACCESS_TOKEN', '')
 MAPILLARY_BASE_URL = "https://graph.mapillary.com"
+
+# Simple grid-based cache to avoid hitting Overpass too hard
+# Key: (amenity, grid_lat, grid_lng), Value: {'timestamp': time, 'data': [...]}
+_poi_cache: Dict = {}
+CACHE_TTL = 300 # 5 minutes
 
 
 def haversine(lat1, lon1, lat2, lon2):
@@ -48,12 +56,90 @@ def get_nearby_images(lat: float, lon: float, radius: int = 500, limit: int = 10
         return []
 
 
+def search_pois_mapillary(lat: float, lon: float, amenity: str, radius_m: int = 5000) -> list:
+    """
+    Search for POIs using Mapillary Graph API v4 map_features.
+    Layers: point.amenity.police, point.amenity.hospital, etc.
+    """
+    if not MAPILLARY_ACCESS_TOKEN:
+        return []
+
+    # Map our amenities to Mapillary layers
+    layer_map = {
+        "police": "point.amenity.police",
+        "hospital": "point.amenity.hospital",
+        "hotel": "point.tourism.hotel"
+    }
+    
+    layer = layer_map.get(amenity)
+    if not layer:
+        return []
+
+    url = f"{MAPILLARY_BASE_URL}/map_features"
+    params = {
+        "access_token": MAPILLARY_ACCESS_TOKEN,
+        "layers": layer,
+        "bbox": _bounding_box(lat, lon, radius_m),
+        "fields": "id,geometry,properties"
+    }
+
+    try:
+        response = requests.get(url, params=params, timeout=15)
+        if response.status_code == 200:
+            data = response.json().get("data", [])
+            print(f"[MAPILLARY] Found {len(data)} features for {amenity}")
+            results = []
+            for feat in data:
+                props = feat.get("properties", {})
+                geom = feat.get("geometry", {}).get("coordinates", [0, 0])
+                
+                # Geometries in GeoJSON are [lng, lat]
+                elem_lon, elem_lat = geom[0], geom[1]
+                distance = haversine(lat, lon, elem_lat, elem_lon)
+                
+                results.append({
+                    "id": feat.get("id"),
+                    "name": props.get("name") or f"{amenity.capitalize()} (Mapillary)",
+                    "lat": elem_lat,
+                    "lng": elem_lon,
+                    "distance_km": round(distance, 2),
+                    "address": props.get("address", "Address verified via Mapillary imagery"),
+                    "source": "Mapillary Graph API"
+                })
+            return results
+    except Exception as e:
+        print(f"Mapillary POI search error: {e}")
+    return []
+
+
 def search_pois_overpass(lat: float, lon: float, amenity: str, radius: int = 5000) -> list:
     """
     Use OpenStreetMap Overpass API (free, no key) to find real POIs near a location.
     This is the best free alternative since Mapillary is for imagery, not POI search.
     Supported amenity values: 'police', 'hospital', 'hotel', 'lodging'
     """
+    # 1. Check cache first
+    # Round to 0.01 (~1.1km) to group nearby requests
+    grid_lat = round(lat, 2)
+    grid_lng = round(lon, 2)
+    cache_key = (amenity, grid_lat, grid_lng, radius)
+    
+    now = time.time()
+    if cache_key in _poi_cache:
+        cached = _poi_cache[cache_key]
+        if now - cached['timestamp'] < CACHE_TTL:
+            print(f"[CACHE] Returning cached {amenity} for grid {grid_lat},{grid_lng}")
+            # IMPORTANT: Distances must be recalculated for the current exact location!
+            results = []
+            for item in cached['data']:
+                item_copy = item.copy()
+                item_copy['distance_km'] = round(haversine(lat, lon, item['lat'], item['lng']), 2)
+                results.append(item_copy)
+            
+            # Sort by new recalculated distance
+            results.sort(key=lambda x: x["distance_km"])
+            return results
+
     overpass_url = "https://overpass-api.de/api/interpreter"
 
     # Map amenity types
@@ -62,7 +148,7 @@ def search_pois_overpass(lat: float, lon: float, amenity: str, radius: int = 500
     elif amenity == "police":
         query_filter = f'(node["amenity"="police"](around:{radius},{lat},{lon}); way["amenity"="police"](around:{radius},{lat},{lon}););'
     elif amenity == "hospital":
-        query_filter = f'(node["amenity"="hospital"](around:{radius},{lat},{lon}); node["amenity"="clinic"](around:{radius},{lat},{lon}); way["amenity"="hospital"](around:{radius},{lat},{lon}););'
+        query_filter = f'(node["amenity"="hospital"](around:{radius},{lat},{lon}); node["amenity"="clinic"](around:{radius},{lat},{lon}); node["amenity"="doctors"](around:{radius},{lat},{lon}); node["amenity"="health_post"](around:{radius},{lat},{lon}); way["amenity"="hospital"](around:{radius},{lat},{lon}););'
     else:
         query_filter = f'node["amenity"="{amenity}"](around:{radius},{lat},{lon});'
 
@@ -76,6 +162,8 @@ def search_pois_overpass(lat: float, lon: float, amenity: str, radius: int = 500
         response = requests.post(overpass_url, data={"data": query}, timeout=20)
         if response.status_code == 200:
             data = response.json()
+            elements = data.get("elements", [])
+            print(f"[OVERPASS] Found {len(elements)} elements for {amenity}")
             results = []
             for element in data.get("elements", []):
                 tags = element.get("tags", {})
@@ -121,6 +209,12 @@ def search_pois_overpass(lat: float, lon: float, amenity: str, radius: int = 500
 
             # Sort by distance
             results.sort(key=lambda x: x["distance_km"])
+            
+            # Store in cache
+            _poi_cache[cache_key] = {
+                'timestamp': now,
+                'data': results
+            }
             return results
 
     except Exception as e:

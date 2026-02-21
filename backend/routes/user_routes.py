@@ -91,20 +91,25 @@ def register():
         cursor = conn.cursor()
 
         # Check for existing user
-        cursor.execute("SELECT id FROM users WHERE phone = ?", (phone,))
+        cursor.execute("SELECT id FROM users WHERE phone = ? OR email = ?", (phone, data.get('email')))
         existing = cursor.fetchone()
         if existing:
             conn.close()
-            return jsonify({'success': False, 'error': 'Phone number already registered. Please login.'}), 409
+            return jsonify({'success': False, 'error': 'Phone number or email already registered. Please login.'}), 409
 
         user_id = str(uuid.uuid4())
         token = str(uuid.uuid4())
 
-        # Insert user (email optional for backward compat — use phone as email)
+        # Email and password handling
+        email = data.get('email', phone + '@safeher.app').strip()
+        password = data.get('password')
+        hashed_pw = hash_password(password) if password else hash_password(phone)
+
+        # Insert user
         cursor.execute("""
             INSERT INTO users (id, name, email, phone, password, city, created_at)
             VALUES (?, ?, ?, ?, ?, ?, ?)
-        """, (user_id, name, phone + '@safeher.app', phone, hash_password(phone), city, datetime.now()))
+        """, (user_id, name, email, phone, hashed_pw, city, datetime.now()))
 
         # Save session
         cursor.execute("""
@@ -145,25 +150,39 @@ def login():
         data = request.json
         phone = data.get('phone', '').strip()
         otp = data.get('otp', '').strip()
-
-        if not phone or not otp:
-            return jsonify({'success': False, 'error': 'Phone and OTP are required'}), 400
-
-        # Verify OTP
-        stored = _otp_store.get(phone)
-        if not stored or stored['otp'] != otp:
-            return jsonify({'success': False, 'error': 'Invalid OTP. Please request a new one.'}), 400
-
-        del _otp_store[phone]
+        email = data.get('email', '').strip()
+        password = data.get('password', '').strip()
 
         conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM users WHERE phone = ?", (phone,))
-        user = cursor.fetchone()
+        user = None
 
-        if not user:
+        # 1. Try Email/Password login
+        if email and password:
+            cursor.execute("SELECT * FROM users WHERE email = ? AND password = ?", (email, hash_password(password)))
+            user = cursor.fetchone()
+            if not user:
+                conn.close()
+                return jsonify({'success': False, 'error': 'Invalid email or password'}), 401
+        
+        # 2. Try OTP login
+        elif phone and otp:
+            # Verify OTP
+            stored = _otp_store.get(phone)
+            if not stored or stored['otp'] != otp:
+                conn.close()
+                return jsonify({'success': False, 'error': 'Invalid OTP. Please request a new one.'}), 400
+
+            del _otp_store[phone]
+            cursor.execute("SELECT * FROM users WHERE phone = ?", (phone,))
+            user = cursor.fetchone()
+            if not user:
+                conn.close()
+                return jsonify({'success': False, 'error': 'Account not found. Please sign up first.'}), 404
+        
+        else:
             conn.close()
-            return jsonify({'success': False, 'error': 'Account not found. Please sign up first.'}), 404
+            return jsonify({'success': False, 'error': 'Email+Password or Phone+OTP required'}), 400
 
         # Create new session token
         token = str(uuid.uuid4())
